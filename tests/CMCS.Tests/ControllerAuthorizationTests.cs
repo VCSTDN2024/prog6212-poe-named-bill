@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CMCS.Controllers;
 using CMCS.Data;
 using CMCS.Models;
+using CMCS.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
@@ -50,7 +51,8 @@ namespace CMCS.Tests
             var repo = new InMemoryClaimRepository();
             var envMock = new Mock<IWebHostEnvironment>();
             envMock.Setup(e => e.ContentRootPath).Returns(System.IO.Directory.GetCurrentDirectory());
-            var controller = new ClaimsController(repo, envMock.Object);
+            var automation = new ClaimAutomationService();
+            var controller = new ClaimsController(repo, envMock.Object, automation);
 
             var context = new DefaultHttpContext();
             var session = new TestSession();
@@ -69,7 +71,8 @@ namespace CMCS.Tests
             var repo = new InMemoryClaimRepository();
             var envMock = new Mock<IWebHostEnvironment>();
             envMock.Setup(e => e.ContentRootPath).Returns(System.IO.Directory.GetCurrentDirectory());
-            var controller = new ClaimsController(repo, envMock.Object);
+            var automation = new ClaimAutomationService();
+            var controller = new ClaimsController(repo, envMock.Object, automation);
 
             var context = new DefaultHttpContext();
             var session = new TestSession();
