@@ -12,5 +12,12 @@ Notes:
 Status:
 - Part 1: GUI prototype created (non-functional front-end available in Views).
 - Part 2: Claim submission, approval/rejection, file upload wiring added (in-memory storage).
+- Part 3: Lecturer automation view with real-time calculation, validation service, and enhanced UX.
+
+Automation Highlights (Part 3):
+- **Automated summary** – Lecturer claim form now surfaces a live payout card that recalculates totals as soon as hours and rates are entered.
+- **Server-side calculation API** – `ClaimAutomationService` enforces business limits (hours per claim, hourly rate caps, and total claim ceilings) and streams warnings/errors back to the UI.
+- **Claim validation** – Controller-level validation blocks invalid submissions before files are uploaded, and tests cover happy/edge cases for the automation logic.
+- **Quick-fill helpers** – Common hour/rate shortcuts reduce manual typing time for lecturers when capturing similar claims.
 
 Refer to `POE_Part2_Report.docx` for the formal Part 2 Word document required for submission.
