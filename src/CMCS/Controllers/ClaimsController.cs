@@ -120,6 +120,16 @@ namespace CMCS.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public IActionResult CalculateSummary([FromBody] ClaimCalculationRequest request)
+        {
+            if (request == null) return BadRequest();
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("username"))) return Unauthorized();
+            var result = _automation.Calculate(request.HoursWorked, request.HourlyRate);
+            return Ok(result);
+        }
+
         public IActionResult Download(int id, string file)
         {
             if (string.IsNullOrEmpty(HttpContext.Session.GetString("username"))) return Forbid();
