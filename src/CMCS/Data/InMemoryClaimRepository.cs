@@ -11,10 +11,55 @@ namespace CMCS.Data
 
         public InMemoryClaimRepository()
         {
-            // Seed with sample claims and users
-            _claims.Add(new Claim { Id = _nextId++, HoursWorked = 10, HourlyRate = 50, Notes = "Sample claim", SubmittedBy = "alice" });
-            _claims.Add(new Claim { Id = _nextId++, HoursWorked = 80, HourlyRate = 420, Notes = "High workload", SubmittedBy = "alice", Status = ClaimStatus.Verified });
-            _claims.Add(new Claim { Id = _nextId++, HoursWorked = 120, HourlyRate = 650, Notes = "Exam support", SubmittedBy = "alice", Status = ClaimStatus.Approved });
+            // Seed with sample claims and users that exercise each workflow state
+            var now = DateTime.UtcNow;
+
+            _claims.Add(new Claim
+            {
+                Id = _nextId++,
+                HoursWorked = 24,
+                HourlyRate = 380,
+                Notes = "Tutorial support block release",
+                SubmittedBy = "alice",
+                SubmittedAt = now.AddDays(-3),
+                AttachedFiles = new List<string> { "timesheet-mar.pdf" }
+            });
+
+            _claims.Add(new Claim
+            {
+                Id = _nextId++,
+                HoursWorked = 92,
+                HourlyRate = 450,
+                Notes = "Semester wrap-up workshops",
+                SubmittedBy = "alice",
+                SubmittedAt = now.AddDays(-2),
+                Status = ClaimStatus.Verified,
+                AttachedFiles = new List<string> { "workshop-roster.xlsx", "invoice.pdf" }
+            });
+
+            _claims.Add(new Claim
+            {
+                Id = _nextId++,
+                HoursWorked = 130,
+                HourlyRate = 620,
+                Notes = "Exam support and moderation",
+                SubmittedBy = "alice",
+                SubmittedAt = now.AddDays(-1),
+                Status = ClaimStatus.Approved,
+                AttachedFiles = new List<string> { "marking-proof.zip" }
+            });
+
+            _claims.Add(new Claim
+            {
+                Id = _nextId++,
+                HoursWorked = 210,
+                HourlyRate = 1500,
+                Notes = "Emergency weekend marking",
+                SubmittedBy = "alice",
+                SubmittedAt = now.AddHours(-8),
+                Status = ClaimStatus.Pending,
+                AttachedFiles = new List<string>()
+            });
 
             _users.Add(new User { Id = 1, Username = "alice", FullName = "Alice Mokoena", Role = "Lecturer", Email = "alice@example.com", PhoneNumber = "+27 82 555 0101", Department = "Information Systems", BankAccount = "FNB ••••1234", Address = "12 King St, Johannesburg" });
             _users.Add(new User { Id = 2, Username = "bob", FullName = "Bob Naidoo", Role = "Coordinator", Email = "bob@example.com", PhoneNumber = "+27 83 555 2223", Department = "Programme Office" });
