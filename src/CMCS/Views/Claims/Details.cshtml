@@ -1,0 +1,82 @@
+@model CMCS.Models.Claim
+
+@{
+    ViewData["Title"] = "Claim Details";
+}
+
+<h1>Claim Details</h1>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">Id</dt>
+        <dd class="col-sm-10">@Model.Id</dd>
+
+        <dt class="col-sm-2">Submitted</dt>
+        <dd class="col-sm-10">@Model.SubmittedAt.ToLocalTime()</dd>
+
+        <dt class="col-sm-2">Hours</dt>
+        <dd class="col-sm-10">@Model.HoursWorked</dd>
+
+        <dt class="col-sm-2">Rate</dt>
+        <dd class="col-sm-10">@Model.HourlyRate</dd>
+
+        <dt class="col-sm-2">Total</dt>
+        <dd class="col-sm-10">@Model.TotalAmount</dd>
+
+        <dt class="col-sm-2">Status</dt>
+        <dd class="col-sm-10">@Model.Status</dd>
+
+        <dt class="col-sm-2">Notes</dt>
+        <dd class="col-sm-10">@Model.Notes</dd>
+
+        <dt class="col-sm-2">Files</dt>
+        <dd class="col-sm-10">
+            <ul>
+            @foreach(var f in Model.AttachedFiles) {
+                <li>
+                    <a asp-action="Download" asp-route-id="@Model.Id" asp-route-file="@f">@System.IO.Path.GetFileName(f)</a>
+                </li>
+            }
+            </ul>
+        </dd>
+
+            <dt class="col-sm-2">Approvals</dt>
+            <dd class="col-sm-10">
+                <ul>
+                @{
+                    var approvals = (ViewBag.Approvals as IEnumerable<CMCS.Models.Approval>) ?? Enumerable.Empty<CMCS.Models.Approval>();
+                    foreach(var a in approvals) {
+                        <li>@a.ApprovedBy - @a.ApprovedAt.ToLocalTime() - @(a.IsApproved ? "Approved" : "Rejected")</li>
+                    }
+                }
+                </ul>
+            </dd>
+    </dl>
+</div>
+
+@{
+    var role = Context.Session.GetString("role");
+    if (role == "Coordinator" && Model.Status == CMCS.Models.ClaimStatus.Pending)
+    {
+        <form asp-action="Verify" method="post" style="display:inline-block;">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button class="btn btn-primary" type="submit">Verify</button>
+        </form>
+    }
+    if (role == "Manager" && Model.Status == CMCS.Models.ClaimStatus.Verified)
+    {
+        <form asp-action="Approve" method="post" style="display:inline-block;">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button class="btn btn-success" type="submit">Approve</button>
+        </form>
+
+        <form asp-action="Reject" method="post" style="display:inline-block;margin-left:10px;">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button class="btn btn-danger" type="submit">Reject</button>
+        </form>
+    }
+}
+
+<p>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</p>

@@ -1,0 +1,53 @@
+@startuml
+' CMCS class diagram for database model
+package "CMCS" {
+  class Lecturer {
+    +int Id
+    +string FirstName
+    +string LastName
+    +string Email
+  }
+
+  class Claim {
+    +int Id
+    +double HoursWorked
+    +double HourlyRate
+    +string Notes
+    +DateTime SubmittedAt
+    +ClaimStatus Status
+    +double TotalAmount
+  }
+
+  class SupportingDocument {
+    +int Id
+    +string FileName
+    +string ContentType
+    +int ClaimId
+  }
+
+  class ProgrammeCoordinator {
+    +int Id
+    +string FirstName
+    +string LastName
+    +string Email
+  }
+
+  class AcademicManager {
+    +int Id
+    +string FirstName
+    +string LastName
+    +string Email
+  }
+
+  enum ClaimStatus {
+    Pending
+    Approved
+    Rejected
+  }
+
+  Lecturer "1" -- "*" Claim : submits >
+  Claim "1" -- "*" SupportingDocument : has >
+  ProgrammeCoordinator "1" -- "*" Claim : verifies >
+  AcademicManager "1" -- "*" Claim : approves >
+}
+@enduml

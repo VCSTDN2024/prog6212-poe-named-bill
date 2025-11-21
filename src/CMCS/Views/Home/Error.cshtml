@@ -1,0 +1,10 @@
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="container mt-5">
+    <h1>Something went wrong</h1>
+    <p class="lead">@ViewBag.Message</p>
+    <p>If the problem persists, please contact the system administrator.</p>
+    <a asp-controller="Claims" asp-action="Index" class="btn btn-secondary">Back to Claims</a>
+</div>

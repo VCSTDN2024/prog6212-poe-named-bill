@@ -1,0 +1,36 @@
+@model CMCS.Models.Claim
+
+@{
+    ViewData["Title"] = "Submit Claim";
+}
+
+<h1>Submit Claim</h1>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="form-group">
+        <label>Hours Worked</label>
+        <input asp-for="HoursWorked" class="form-control" />
+        <span asp-validation-for="HoursWorked" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label>Hourly Rate</label>
+        <input asp-for="HourlyRate" class="form-control" />
+        <span asp-validation-for="HourlyRate" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label>Notes</label>
+        <textarea asp-for="Notes" class="form-control"></textarea>
+    </div>
+    <div class="form-group">
+        <label>Supporting Documents</label>
+        <input type="file" name="files" multiple class="form-control" />
+        <small class="form-text text-muted">Allowed types: .pdf, .docx, .xlsx, .png, .jpg. Max file size: 5 MB each. Total upload limit: 10 MB.</small>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

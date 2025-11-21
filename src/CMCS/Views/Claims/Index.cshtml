@@ -1,0 +1,100 @@
+@model IEnumerable<CMCS.Models.Claim>
+
+@{
+    ViewData["Title"] = "Claims";
+}
+
+<div class="d-flex justify-content-between align-items-center">
+    <h1>Claims</h1>
+    @{
+        var sessionRole = Context.Session.GetString("role");
+        if (sessionRole == "Lecturer")
+        {
+            <a asp-action="Create" class="btn btn-primary">Submit New Claim</a>
+        }
+    }
+</div>
+
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Submitted</th>
+            <th class="text-end">Hours</th>
+            <th class="text-end">Rate</th>
+            <th class="text-end">Total</th>
+            <th>Files</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach(var c in Model) {
+        <tr>
+            <td>@c.Id</td>
+            <td>@c.SubmittedAt.ToLocalTime().ToString("g")</td>
+            <td class="text-end">@c.HoursWorked</td>
+            <td class="text-end">@c.HourlyRate</td>
+            <td class="text-end">@c.TotalAmount</td>
+            <td>
+                @if (c.AttachedFiles != null && c.AttachedFiles.Any())
+                {
+                    <span class="badge bg-secondary">@c.AttachedFiles.Count()</span>
+                    <div class="mt-1">
+                    @{
+                        var first = true;
+                        foreach(var f in c.AttachedFiles)
+                        {
+                            if (!first) { <text>, </text>; }
+                            <a asp-action="Download" asp-route-id="@c.Id" asp-route-file="@f">@System.IO.Path.GetFileName(f)</a>
+                            first = false;
+                        }
+                    }
+                    </div>
+                }
+            </td>
+            <td>
+                @switch(c.Status)
+                {
+                    case CMCS.Models.ClaimStatus.Pending:
+                        <span class="badge bg-secondary">Pending</span>
+                        break;
+                    case CMCS.Models.ClaimStatus.Verified:
+                        <span class="badge bg-info">Verified</span>
+                        break;
+                    case CMCS.Models.ClaimStatus.Approved:
+                        <span class="badge bg-success">Approved</span>
+                        break;
+                    case CMCS.Models.ClaimStatus.Rejected:
+                        <span class="badge bg-danger">Rejected</span>
+                        break;
+                }
+            </td>
+            <td>
+                <a asp-action="Details" asp-route-id="@c.Id" class="btn btn-sm btn-info">View</a>
+                @{
+                    var role = Context.Session.GetString("role");
+                    if (role == "Coordinator" && c.Status == CMCS.Models.ClaimStatus.Pending)
+                    {
+                        <form asp-action="Verify" method="post" style="display:inline-block;margin-left:6px;">
+                            <input type="hidden" name="id" value="@c.Id" />
+                            <button class="btn btn-sm btn-primary">Verify</button>
+                        </form>
+                    }
+                    if (role == "Manager" && c.Status == CMCS.Models.ClaimStatus.Verified)
+                    {
+                        <form asp-action="Approve" method="post" style="display:inline-block;margin-left:6px;">
+                            <input type="hidden" name="id" value="@c.Id" />
+                            <button class="btn btn-sm btn-success">Approve</button>
+                        </form>
+                        <form asp-action="Reject" method="post" style="display:inline-block;margin-left:6px;">
+                            <input type="hidden" name="id" value="@c.Id" />
+                            <button class="btn btn-sm btn-danger">Reject</button>
+                        </form>
+                    }
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

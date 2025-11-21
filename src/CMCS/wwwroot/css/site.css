@@ -1,0 +1,4 @@
+body { padding-bottom: 40px; }
+h1 { font-family: Georgia, serif; font-weight: 700; }
+.table td, .table th { vertical-align: middle; }
+.btn-sm { padding: .25rem .4rem; }

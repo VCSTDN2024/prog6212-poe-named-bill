@@ -1,0 +1,37 @@
+# General build artifacts
+**/bin/
+**/obj/
+**/out/
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.code-workspace
+
+# User-specific files
+*.user
+*.suo
+*.userprefs
+
+# Logs and diagnostics
+*.log
+*.svclog
+*.coverage
+*.coveragexml
+TestResult*/
+
+# NuGet packages and lock files
+*.nupkg
+*.snupkg
+packages/
+project.lock.json
+
+# ASP.NET / Static assets
+**/wwwroot/uploads/
+uploads/
+
+# Other
+_ReSharper*/
+.idea/
+.DS_Store
+Thumbs.db
