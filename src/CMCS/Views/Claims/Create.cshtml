@@ -2,35 +2,103 @@
 
 @{
     ViewData["Title"] = "Submit Claim";
+    var automationSummary = ViewBag.AutomationSummary as CMCS.Models.ClaimCalculationResult;
+    var summaryState = automationSummary == null
+        ? "empty"
+        : (automationSummary.IsValid ? "valid" : "invalid");
 }
 
 <h1>Submit Claim</h1>
 
-<form asp-action="Create" method="post" enctype="multipart/form-data">
-    <div asp-validation-summary="All" class="text-danger"></div>
-    <div class="form-group">
-        <label>Hours Worked</label>
-        <input asp-for="HoursWorked" class="form-control" />
-        <span asp-validation-for="HoursWorked" class="text-danger"></span>
+<div class="row g-4">
+    <div class="col-lg-7">
+        <form id="claim-create-form" asp-action="Create" method="post" enctype="multipart/form-data" data-calculation-endpoint="@Url.Action("CalculateSummary", "Claims")">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label>Hours Worked</label>
+                <input asp-for="HoursWorked" class="form-control" inputmode="decimal" />
+                <span asp-validation-for="HoursWorked" class="text-danger"></span>
+                <div class="btn-group mt-2" role="group" aria-label="Quick hours">
+                    <button type="button" class="btn btn-outline-secondary quick-fill" data-target="HoursWorked" data-value="8">8 hrs</button>
+                    <button type="button" class="btn btn-outline-secondary quick-fill" data-target="HoursWorked" data-value="16">16 hrs</button>
+                    <button type="button" class="btn btn-outline-secondary quick-fill" data-target="HoursWorked" data-value="24">24 hrs</button>
+                </div>
+            </div>
+            <div class="form-group mt-3">
+                <label>Hourly Rate</label>
+                <input asp-for="HourlyRate" class="form-control" inputmode="decimal" />
+                <span asp-validation-for="HourlyRate" class="text-danger"></span>
+                <div class="btn-group mt-2" role="group" aria-label="Quick hourly rate">
+                    <button type="button" class="btn btn-outline-secondary quick-fill" data-target="HourlyRate" data-value="250">R250</button>
+                    <button type="button" class="btn btn-outline-secondary quick-fill" data-target="HourlyRate" data-value="350">R350</button>
+                    <button type="button" class="btn btn-outline-secondary quick-fill" data-target="HourlyRate" data-value="450">R450</button>
+                </div>
+            </div>
+            <div class="form-group mt-3">
+                <label>Notes</label>
+                <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Provide a brief breakdown of modules or activities covered."></textarea>
+            </div>
+            <div class="form-group mt-3">
+                <label>Supporting Documents</label>
+                <input type="file" name="files" multiple class="form-control" />
+                <small class="form-text text-muted">Allowed types: .pdf, .docx, .xlsx, .png, .jpg. Max file size: 5 MB each. Total upload limit: 10 MB.</small>
+            </div>
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary flex-grow-1">Submit Claim</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
     </div>
-    <div class="form-group">
-        <label>Hourly Rate</label>
-        <input asp-for="HourlyRate" class="form-control" />
-        <span asp-validation-for="HourlyRate" class="text-danger"></span>
+    <div class="col-lg-5">
+        <div id="claim-summary" class="claim-summary-card" data-state="@summaryState">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="mb-0">Automated Payment Summary</h5>
+                    <small class="text-muted">Calculated in real-time from lecturer inputs</small>
+                </div>
+                <div class="automation-indicator" aria-live="polite"></div>
+            </div>
+            <p class="text-muted mb-1">Estimated payout</p>
+            <div class="display-6 fw-bold" id="claim-total">
+                @(automationSummary != null && automationSummary.TotalAmount > 0
+                    ? automationSummary.TotalAmount.ToString("C2")
+                    : "--")
+            </div>
+            <dl class="row small mt-3">
+                <dt class="col-6">Hours</dt>
+                <dd class="col-6 text-end" id="summary-hours">@(automationSummary?.HoursWorked > 0 ? automationSummary.HoursWorked.ToString("N2") : "--")</dd>
+                <dt class="col-6">Hourly Rate</dt>
+                <dd class="col-6 text-end" id="summary-rate">@(automationSummary?.HourlyRate > 0 ? automationSummary.HourlyRate.ToString("C2") : "--")</dd>
+            </dl>
+            <div class="automation-messages">
+                <ul id="claim-warning-list" class="text-warning small mb-2">
+                    @if (automationSummary?.Warnings?.Count > 0)
+                    {
+                        foreach (var warning in automationSummary.Warnings)
+                        {
+                            <li>@warning</li>
+                        }
+                    }
+                </ul>
+                <ul id="claim-error-list" class="text-danger small mb-0">
+                    @if (automationSummary?.Errors?.Count > 0)
+                    {
+                        foreach (var error in automationSummary.Errors)
+                        {
+                            <li>@error</li>
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+        <div class="alert alert-info mt-3 small" role="alert">
+            Automation tip: Capture your actual hours and the approved hourly rate.
+            The claim total is recalculated automatically and validation checks run instantly.
+        </div>
     </div>
-    <div class="form-group">
-        <label>Notes</label>
-        <textarea asp-for="Notes" class="form-control"></textarea>
-    </div>
-    <div class="form-group">
-        <label>Supporting Documents</label>
-        <input type="file" name="files" multiple class="form-control" />
-        <small class="form-text text-muted">Allowed types: .pdf, .docx, .xlsx, .png, .jpg. Max file size: 5 MB each. Total upload limit: 10 MB.</small>
-    </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/claims-create.js" asp-append-version="true"></script>
 }
