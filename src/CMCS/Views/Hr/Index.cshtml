@@ -1,0 +1,67 @@
+@model CMCS.Models.HrDashboardViewModel
+@{
+    ViewData["Title"] = "HR Dashboard";
+}
+
+<h1>HR Automation Dashboard</h1>
+<p class="text-muted">Realtime overview of approved claims ready for payroll.</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Approved Claims</h6>
+                <div class="display-6">@Model.ApprovedClaimCount</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Total Value</h6>
+                <div class="display-6">@Model.ApprovedClaimValue.ToString("C0")</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <h6 class="text-muted">Actions</h6>
+                <a asp-action="DownloadReport" class="btn btn-primary mb-2">Download CSV Report</a>
+                <a asp-action="Lecturers" class="btn btn-outline-secondary">Manage Lecturer Profiles</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="h4">Latest approved claims</h2>
+<table class="table table-sm table-striped">
+    <thead>
+        <tr>
+            <th>Claim</th>
+            <th>Lecturer</th>
+            <th>Department</th>
+            <th>Hours</th>
+            <th>Total</th>
+            <th>Approved</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var row in Model.ReportRows)
+    {
+        <tr>
+            <td>#@row.ClaimId</td>
+            <td>@row.Lecturer</td>
+            <td>@row.Department</td>
+            <td>@row.HoursWorked.ToString("F1")</td>
+            <td>@row.TotalAmount.ToString("C0")</td>
+            <td>@(row.ApprovedAt?.ToLocalTime().ToString("g") ?? "Pending")</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@if (!Model.ReportRows.Any())
+{
+    <div class="alert alert-info">No approved claims yet. Once managers approve submissions they will show here.</div>
+}

@@ -154,10 +154,7 @@ namespace CMCS.Controllers
         {
             var role = HttpContext.Session.GetString("role");
             if (role != "Coordinator") return Forbid();
-            if (_repo is InMemoryClaimRepository mem)
-            {
-                mem.VerifyClaim(id, HttpContext.Session.GetString("username") ?? "unknown");
-            }
+            _repo.VerifyClaim(id, HttpContext.Session.GetString("username") ?? "unknown");
             return RedirectToAction(nameof(Index));
         }
 
@@ -181,10 +178,7 @@ namespace CMCS.Controllers
             if (claim == null) return NotFound();
             claim.Status = ClaimStatus.Approved;
             _repo.Update(claim);
-            if (_repo is InMemoryClaimRepository mem)
-            {
-                mem.AddApproval(new Approval { ClaimId = id, ApprovedBy = HttpContext.Session.GetString("username") ?? "unknown", IsApproved = true });
-            }
+            _repo.AddApproval(new Approval { ClaimId = id, ApprovedBy = HttpContext.Session.GetString("username") ?? "unknown", IsApproved = true });
             return RedirectToAction(nameof(Index));
         }
 
@@ -197,10 +191,7 @@ namespace CMCS.Controllers
             if (claim == null) return NotFound();
             claim.Status = ClaimStatus.Rejected;
             _repo.Update(claim);
-            if (_repo is InMemoryClaimRepository mem)
-            {
-                mem.AddApproval(new Approval { ClaimId = id, ApprovedBy = HttpContext.Session.GetString("username") ?? "unknown", IsApproved = false });
-            }
+            _repo.AddApproval(new Approval { ClaimId = id, ApprovedBy = HttpContext.Session.GetString("username") ?? "unknown", IsApproved = false });
             return RedirectToAction(nameof(Index));
         }
     }

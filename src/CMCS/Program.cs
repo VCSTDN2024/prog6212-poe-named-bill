@@ -11,6 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 builder.Services.AddSingleton<IClaimRepository, InMemoryClaimRepository>();
 builder.Services.AddSingleton<ClaimAutomationService>();
+builder.Services.AddSingleton<ClaimReviewService>();
+builder.Services.AddSingleton<ClaimWorkflowService>();
+builder.Services.AddSingleton<HrReportingService>();
 // Limit multipart body size to 10 MB for uploads
 builder.Services.Configure<FormOptions>(options =>
 {

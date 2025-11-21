@@ -11,11 +11,15 @@ namespace CMCS.Data
 
         public InMemoryClaimRepository()
         {
-            // Seed with a sample claim
-            _claims.Add(new Claim { Id = _nextId++, HoursWorked = 10, HourlyRate = 50, Notes = "Sample claim" });
-            _users.Add(new User { Id = 1, Username = "alice", Role = "Lecturer" });
-            _users.Add(new User { Id = 2, Username = "bob", Role = "Coordinator" });
-            _users.Add(new User { Id = 3, Username = "carol", Role = "Manager" });
+            // Seed with sample claims and users
+            _claims.Add(new Claim { Id = _nextId++, HoursWorked = 10, HourlyRate = 50, Notes = "Sample claim", SubmittedBy = "alice" });
+            _claims.Add(new Claim { Id = _nextId++, HoursWorked = 80, HourlyRate = 420, Notes = "High workload", SubmittedBy = "alice", Status = ClaimStatus.Verified });
+            _claims.Add(new Claim { Id = _nextId++, HoursWorked = 120, HourlyRate = 650, Notes = "Exam support", SubmittedBy = "alice", Status = ClaimStatus.Approved });
+
+            _users.Add(new User { Id = 1, Username = "alice", FullName = "Alice Mokoena", Role = "Lecturer", Email = "alice@example.com", PhoneNumber = "+27 82 555 0101", Department = "Information Systems", BankAccount = "FNB ••••1234", Address = "12 King St, Johannesburg" });
+            _users.Add(new User { Id = 2, Username = "bob", FullName = "Bob Naidoo", Role = "Coordinator", Email = "bob@example.com", PhoneNumber = "+27 83 555 2223", Department = "Programme Office" });
+            _users.Add(new User { Id = 3, Username = "carol", FullName = "Carol Smith", Role = "Manager", Email = "carol@example.com", PhoneNumber = "+27 84 555 7890", Department = "Academic Management" });
+            _users.Add(new User { Id = 4, Username = "helen", FullName = "Helen Dlamini", Role = "HR", Email = "helen@example.com", PhoneNumber = "+27 82 555 0042", Department = "Human Resources" });
         }
 
         public Claim Add(Claim c)
@@ -56,11 +60,34 @@ namespace CMCS.Data
 
         public IEnumerable<Approval> GetApprovalsForClaim(int claimId) => _approvals.Where(x => x.ClaimId == claimId);
 
-        public User? GetUserByName(string username) => _users.FirstOrDefault(u => u.Username == username);
+        public IEnumerable<Approval> GetAllApprovals() => _approvals;
+
+        public User? GetUserByName(string username) => _users.FirstOrDefault(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+
+        public IEnumerable<User> GetAllUsers() => _users;
+
+        public IEnumerable<User> GetUsersByRole(string role) => _users.Where(u => u.Role.Equals(role, StringComparison.OrdinalIgnoreCase));
+
+        public User? GetUser(int id) => _users.FirstOrDefault(u => u.Id == id);
+
+        public void UpdateUser(User user)
+        {
+            var existing = GetUser(user.Id);
+            if (existing == null) return;
+            existing.FullName = user.FullName;
+            existing.Email = user.Email;
+            existing.PhoneNumber = user.PhoneNumber;
+            existing.Department = user.Department;
+            existing.BankAccount = user.BankAccount;
+            existing.Address = user.Address;
+            existing.Role = user.Role;
+        }
 
         public Claim? Get(int id) => _claims.FirstOrDefault(x => x.Id == id);
 
         public IEnumerable<Claim> GetAll() => _claims.OrderByDescending(c => c.SubmittedAt);
+
+        public IEnumerable<Claim> GetByStatus(ClaimStatus status) => _claims.Where(c => c.Status == status).OrderBy(c => c.SubmittedAt);
 
         public void Update(Claim c)
         {

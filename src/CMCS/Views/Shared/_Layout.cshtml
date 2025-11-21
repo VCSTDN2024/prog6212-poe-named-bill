@@ -20,6 +20,19 @@
                         {
                             <li class="nav-item"><a class="nav-link" asp-controller="Claims" asp-action="Create">Submit Claim</a></li>
                         }
+                        if (sessRole == "Coordinator")
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Coordinator" asp-action="Dashboard">Coordinator Dashboard</a></li>
+                        }
+                        if (sessRole == "Manager")
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Manager" asp-action="Dashboard">Manager Dashboard</a></li>
+                        }
+                        if (sessRole == "HR")
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Hr" asp-action="Index">HR Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Hr" asp-action="Lecturers">Lecturers</a></li>
+                        }
                     }
                 </ul>
                 <ul class="navbar-nav">

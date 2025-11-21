@@ -1,0 +1,104 @@
+@model CMCS.Models.ManagerDashboardViewModel
+@{
+    ViewData["Title"] = "Manager Automation";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1>Manager Automation</h1>
+        <p class="text-muted mb-0">Auto-approval ready claims that already passed coordinator checks.</p>
+    </div>
+    <form asp-action="BulkApprove" method="post" id="bulkApproveForm">
+        <button type="submit" class="btn btn-success" disabled id="bulkApproveBtn">Auto-approve Selected</button>
+    </form>
+</div>
+
+@if (TempData["ManagerSuccess"] != null)
+{
+    <div class="alert alert-success">@TempData["ManagerSuccess"]</div>
+}
+@if (TempData["ManagerError"] != null)
+{
+    <div class="alert alert-danger">@TempData["ManagerError"]</div>
+}
+
+<table class="table table-striped" id="managerTable">
+    <thead>
+        <tr>
+            <th><input type="checkbox" id="selectAll" /></th>
+            <th>Claim</th>
+            <th>Lecturer</th>
+            <th>Total</th>
+            <th>Risk</th>
+            <th>Recommendation</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var row in Model.VerifiedClaims)
+    {
+        <tr>
+            <td><input type="checkbox" class="bulk-check" name="ids" value="@row.Claim.Id" @(row.Review.MeetsPolicy && row.Review.RiskScore <= 0.5 ? "" : "disabled") /></td>
+            <td>#@row.Claim.Id<br /><small class="text-muted">Verified @row.Claim.SubmittedAt.ToLocalTime().ToString("g")</small></td>
+            <td>@row.Claim.SubmittedBy</td>
+            <td>@row.Review.TotalAmount.ToString("C0")</td>
+            <td>
+                <span class="fw-bold">@row.Review.RiskScore</span>
+                <div class="small text-muted">@(row.Review.RiskScore <= 0.3 ? "Low" : row.Review.RiskScore <= 0.6 ? "Medium" : "High")</div>
+            </td>
+            <td>
+                @if (row.Review.MeetsPolicy)
+                {
+                    <span class="badge bg-success">Auto-ready</span>
+                }
+                else
+                {
+                    <span class="badge bg-warning text-dark">Manual</span>
+                }
+                <div class="small mt-2">
+                    @foreach (var msg in row.Review.PolicyFlags.Take(2))
+                    {
+                        <div>• @msg</div>
+                    }
+                </div>
+            </td>
+            <td class="text-end">
+                <form asp-action="AutoApprove" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@row.Claim.Id" />
+                    <button class="btn btn-outline-success btn-sm" @(row.Review.MeetsPolicy && row.Review.RiskScore <= 0.5 ? "" : "disabled")>Auto Approve</button>
+                </form>
+                <a asp-controller="Claims" asp-action="Details" asp-route-id="@row.Claim.Id" class="btn btn-link btn-sm">Details</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@if (!Model.VerifiedClaims.Any())
+{
+    <div class="alert alert-info">No verified claims awaiting manager approval.</div>
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.bulk-check:not([disabled])');
+            const button = document.getElementById('bulkApproveBtn');
+
+            function updateSelection() {
+                const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+                button.disabled = selected.length === 0;
+            }
+
+            selectAll?.addEventListener('change', () => {
+                checkboxes.forEach(cb => {
+                    cb.checked = !cb.disabled && selectAll.checked;
+                });
+                updateSelection();
+            });
+
+            checkboxes.forEach(cb => cb.addEventListener('change', updateSelection));
+        })();
+    </script>
+}

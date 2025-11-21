@@ -1,0 +1,83 @@
+@model CMCS.Models.CoordinatorDashboardViewModel
+@{
+    ViewData["Title"] = "Coordinator Workflow";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1>Coordinator Workflow</h1>
+        <p class="text-muted mb-0">Automation summary for all pending lecturer claims.</p>
+    </div>
+    <span class="badge bg-primary">@Model.PendingClaims.Count() pending</span>
+</div>
+
+@if (TempData["CoordinatorSuccess"] != null)
+{
+    <div class="alert alert-success">@TempData["CoordinatorSuccess"]</div>
+}
+@if (TempData["CoordinatorError"] != null)
+{
+    <div class="alert alert-danger">@TempData["CoordinatorError"]</div>
+}
+
+<table class="table table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Claim</th>
+            <th>Lecturer</th>
+            <th>Hours</th>
+            <th>Total</th>
+            <th>Policy checks</th>
+            <th>Risk</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var row in Model.PendingClaims)
+    {
+        <tr>
+            <td>
+                <strong>#@row.Claim.Id</strong><br />
+                <small class="text-muted">@row.Claim.SubmittedAt.ToLocalTime().ToString("g")</small>
+            </td>
+            <td>@row.Claim.SubmittedBy</td>
+            <td>@row.Claim.HoursWorked.ToString("F1") h @row.Claim.HourlyRate.ToString("C0")</td>
+            <td>@row.Review.TotalAmount.ToString("C0")</td>
+            <td>
+                @if (row.Review.MeetsPolicy)
+                {
+                    <span class="badge bg-success">All checks passed</span>
+                }
+                else
+                {
+                    <span class="badge bg-warning text-dark">Attention</span>
+                }
+                <ul class="small mb-0 mt-2">
+                    @foreach (var message in row.Review.MeetsPolicy ? row.Review.PassedChecks.Take(2) : row.Review.FailedChecks)
+                    {
+                        <li>@message</li>
+                    }
+                </ul>
+            </td>
+            <td>
+                <span class="fw-bold">@row.Review.RiskScore</span>
+                <div class="progress mt-1" style="height:6px;">
+                    <div class="progress-bar bg-@(row.Review.RiskScore < 0.4 ? "success" : row.Review.RiskScore < 0.7 ? "warning" : "danger")" role="progressbar" style="width: @(row.Review.RiskScore * 100)%"></div>
+                </div>
+            </td>
+            <td class="text-end">
+                <form asp-action="AutoVerify" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@row.Claim.Id" />
+                    <button class="btn btn-sm btn-outline-primary" @(row.Review.MeetsPolicy ? "" : "disabled")>Auto Verify</button>
+                </form>
+                <a asp-controller="Claims" asp-action="Details" asp-route-id="@row.Claim.Id" class="btn btn-sm btn-link">Details</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@if (!Model.PendingClaims.Any())
+{
+    <div class="alert alert-info">No pending claims right now. All lecturer submissions are up to date.</div>
+}
