@@ -1,4 +1,5 @@
 using CMCS.Data;
+using CMCS.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 builder.Services.AddSingleton<IClaimRepository, InMemoryClaimRepository>();
+builder.Services.AddSingleton<ClaimAutomationService>();
 // Limit multipart body size to 10 MB for uploads
 builder.Services.Configure<FormOptions>(options =>
 {
