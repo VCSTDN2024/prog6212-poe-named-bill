@@ -1,5 +1,6 @@
 using CMCS.Data;
 using CMCS.Models;
+using CMCS.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CMCS.Controllers
@@ -8,11 +9,13 @@ namespace CMCS.Controllers
     {
         private readonly IClaimRepository _repo;
         private readonly IWebHostEnvironment _env;
+        private readonly ClaimAutomationService _automation;
 
-        public ClaimsController(IClaimRepository repo, IWebHostEnvironment env)
+        public ClaimsController(IClaimRepository repo, IWebHostEnvironment env, ClaimAutomationService automation)
         {
             _repo = repo;
             _env = env;
+            _automation = automation;
         }
 
         public IActionResult Index()
@@ -27,15 +30,28 @@ namespace CMCS.Controllers
             if (string.IsNullOrEmpty(HttpContext.Session.GetString("username"))) return RedirectToAction("Login", "Account");
             var role = HttpContext.Session.GetString("role");
             if (role != "Lecturer") return Forbid();
+            ViewBag.AutomationSummary = new ClaimCalculationResult();
             return View(new Claim());
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(Claim model)
         {
-            if (!ModelState.IsValid) return View(model);
             var role = HttpContext.Session.GetString("role");
             if (role != "Lecturer") return Forbid();
+
+            var calculation = _automation.Calculate(model.HoursWorked, model.HourlyRate);
+            ViewBag.AutomationSummary = calculation;
+            if (!calculation.IsValid)
+            {
+                foreach (var error in calculation.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error);
+                }
+            }
+            ViewBag.AutomationWarnings = calculation.Warnings;
+
+            if (!ModelState.IsValid) return View(model);
             model.SubmittedAt = DateTime.UtcNow;
             model.SubmittedBy = HttpContext.Session.GetString("username");
             var added = _repo.Add(model);
